@@ -1,6 +1,6 @@
 <form [formGroup]="stockPickerForm">
   <mat-form-field>
-    <input
+    <input label="Symbol"
       matInput
       placeholder="Symbol e.g AAPL"
       formControlName="symbol"
@@ -28,8 +28,23 @@
       </mat-option>
     </mat-select>
   </mat-form-field>
+  <ng-container *ngIf="showDateRage">
+    <mat-form-field>
+      <mat-label>Choose start date</mat-label>
+      <input matInput [matDatepicker]="startDate" [max]="todayDate" formControlName="startDate">
+      <mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
+      <mat-datepicker #startDate startView="month" [startAt]="todayDate"></mat-datepicker>
+    </mat-form-field>
 
-  <button (click)="fetchQuote()" mat-raised-button>Go</button>
+    <mat-form-field>
+      <mat-label>Choose end date</mat-label>
+      <input matInput [matDatepicker]="endDate" [max]="todayDate" formControlName="endDate">
+      <mat-datepicker-toggle matSuffix [for]="endDate"></mat-datepicker-toggle>
+      <mat-datepicker #endDate startView="month" [startAt]="todayDate"></mat-datepicker>
+    </mat-form-field>
+  </ng-container>
+
+  <button (click)="checkInput()" mat-raised-button>Fetch Quote</button>
 </form>
 
 <coding-challenge-chart [data$]="quotes$"></coding-challenge-chart>
