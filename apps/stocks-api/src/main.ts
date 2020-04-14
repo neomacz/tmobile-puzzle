@@ -1,32 +1,36 @@
-/**
- * This is not a production server yet!
- * This is only a minimal backend to get started.
- **/
-import { Server } from 'hapi';
+const Hapi = require('@hapi/hapi');
+const H2o2 = require('@hapi/h2o2');
+const Catbox = require('@hapi/catbox');
+const CatboxMemory = require('@hapi/catbox-memory');
 
-const init = async () => {
-  const server = new Server({
+const catboxClient = new Catbox.Client(CatboxMemory);
+
+const start = async function() {
+
+  const server = new Hapi.server({
     port: 3333,
-    host: 'localhost'
+    host: 'localhost',
   });
 
-  server.route({
-    method: 'GET',
-    path: '/',
-    handler: (request, h) => {
-      return {
-        hello: 'world'
-      };
-    }
-  });
+  try {
+    await server.register(H2o2);
+    server.route({
+      method: "*",
+      path: '/{symbol}/{time}',
+      handler: {
+        proxy: {
+          uri: 'https://sandbox.iexapis.com/beta/stock/{symbol}/chart/{time}?token=Tpk_652e69691d94476d84a3ae96343e10be',
+          passThrough: true
+        }
+      }
+    });
+    await server.start();
 
-  await server.start();
-  console.log('Server running on %s', server.info.uri);
-};
+    console.log(`Server started at:  ${server.info.uri}`);
+  }
+  catch(e) {
+    console.log('Failed to load server');
+  }
+}
 
-process.on('unhandledRejection', err => {
-  console.log(err);
-  process.exit(1);
-});
-
-init();
+start();
